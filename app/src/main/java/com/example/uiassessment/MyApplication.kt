@@ -1,9 +1,9 @@
 package com.example.lostandfound
 
 import android.app.Application
-
 import dagger.hilt.android.HiltAndroidApp
 
+
 @HiltAndroidApp
-class AppApplication:Application() {
+class MyApplication:Application() {
 }

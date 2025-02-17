@@ -42,4 +42,4 @@ data class Fonts(
 
 )
 
-val localFonts = compositionLocalOf { Fonts() }
+val LocalFonts = compositionLocalOf { Fonts() }
