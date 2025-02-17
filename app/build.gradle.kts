@@ -58,7 +58,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    implementation("androidx.compose.material:material:1.7.8")
 
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
@@ -67,6 +67,8 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
 }
 
 kapt {
