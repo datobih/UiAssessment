@@ -36,6 +36,7 @@ import com.example.uiassessment.R
 import com.example.uiassessment.ui.CustomDescriptionTextField
 import com.example.uiassessment.ui.CustomMenuTextField
 import com.example.uiassessment.ui.CustomTextField
+import com.example.uiassessment.ui.TagsField
 import com.example.uiassessment.ui.theme.LocalFonts
 import com.example.uiassessment.ui.theme.borderGrey
 import com.example.uiassessment.ui.theme.darkBlue
@@ -178,10 +179,8 @@ fun AddScreen(){
                     text = "Tags",
                     style = LocalFonts.current.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
-                CustomTextField(tagsState, "Add a tag",
-                    { text -> tagsState = text }, modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                TagsField()
             }
 
 

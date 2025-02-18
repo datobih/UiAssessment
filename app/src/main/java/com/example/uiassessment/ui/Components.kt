@@ -15,22 +15,29 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +62,7 @@ import com.example.uiassessment.ui.theme.searchBarColor
 import com.example.uiassessment.ui.theme.LocalFonts
 import com.example.uiassessment.ui.theme.borderGrey
 import com.example.uiassessment.ui.theme.smallTextLight
+import com.example.uiassessment.ui.theme.tagGray
 import com.example.uiassessment.ui.theme.tagOrange
 import androidx.compose.ui.unit.sp as sp1
 
@@ -346,4 +354,78 @@ fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Un
 }
 
 
+@Composable
+fun TagsField() {
+    val tags = remember { mutableStateListOf<String>() } // State to hold the tags
+    var textState by remember { mutableStateOf("") } // State for the input text
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+                value = textState,
+                onValueChange = { textState = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    androidx.compose.material3.Text(
+                        "Add a tag",
+                        style = LocalFonts.current.bodyRegularLightAlt // Light Gray placeholder text
+                    )
+                },
+                shape = RoundedCornerShape(8.dp), // Rounded corners for input field
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = smallTextLight,
+                    focusedBorderColor = smallTextLight,
+                    focusedPlaceholderColor = smallTextLight,
+                    unfocusedPlaceholderColor = smallTextLight,
+                    cursorColor = Color.Black
+                )
+            , keyboardActions = KeyboardActions(onDone = {  val tagText = textState.trim()
+                    if (tagText.isNotEmpty() && !tags.contains(tagText)) {
+                        tags.add(tagText)
+                        textState = "" // Clear input after adding
+                    }})
+            )
+
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyRow( // Display tags horizontally
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(tags.toList()) { tag ->
+                TagChip(
+                    tagName = tag,
+                    onRemove = { tags.remove(tag) } // Remove tag from list
+                )
+                Spacer(modifier = Modifier.width(8.dp)) // Spacing between tags
+            }
+        }
+    }
+
+
+@Composable
+fun TagChip(tagName: String, onRemove: () -> Unit) {
+    Box(
+        modifier = Modifier.clip(RoundedCornerShape(2.dp)).background(
+            tagGray
+            )
+
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = tagName, style = LocalFonts.current.bodySmall) // Tag text
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(R.drawable.cancel), // "x" icon for removal
+                contentDescription = "Remove tag",
+                modifier = Modifier
+                    .size(6.dp)
+                    .clickable { onRemove() } // Clickable to trigger removal
+            )
+        }
+    }
+}
 
