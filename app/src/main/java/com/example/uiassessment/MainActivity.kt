@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.uiassessment.navigation.HomeNavHost
+import com.example.uiassessment.ui.screens.HomeScreen
 import com.example.uiassessment.ui.theme.UiAssessmentTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,10 +20,10 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
             UiAssessmentTheme {
-                HomeNavHost()
+                HomeScreen()
             }
         }
     }
