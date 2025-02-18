@@ -3,6 +3,7 @@ package com.example.uiassessment.ui.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.uiassessment.R
+import com.example.uiassessment.navigation.AddFoodRef
 import com.example.uiassessment.rememberWindowSize
 import com.example.uiassessment.ui.FoodCard
 import com.example.uiassessment.ui.SearchBar
@@ -44,7 +48,7 @@ import com.example.uiassessment.ui.theme.smallTextLight
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavHostController) {
     val context = LocalContext.current
     var selectedPosition  by rememberSaveable { mutableStateOf(1) }
 
@@ -143,7 +147,7 @@ fun HomeScreen() {
         }
 
         Icon(painter = painterResource(R.drawable.add_square),
-            modifier = Modifier.padding(40.dp).size(56.dp).align(Alignment.BottomEnd),
+            modifier = Modifier.padding(40.dp).size(56.dp).clickable { navController.navigate(AddFoodRef) }.align(Alignment.BottomEnd),
            contentDescription = "Add Food")
 
 

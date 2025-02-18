@@ -20,7 +20,7 @@ object AddFoodRef
 fun BaseNavHost(){
     val navController = rememberNavController()
     NavHost(navController, startDestination = HomeRef){
-        composable<HomeRef> { HomeScreen()  }
+        composable<HomeRef> { HomeScreen(navController)  }
         composable<AddFoodRef> { AddScreen()  }
     }
 

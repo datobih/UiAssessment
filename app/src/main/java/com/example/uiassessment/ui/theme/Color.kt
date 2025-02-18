@@ -21,3 +21,7 @@ val secondaryTextLight = Color(0xFF707989)
 val optionBgLight = Color(0xFFF9FAFB)
 val tagOrange = Color(0xFFFBF1F1)
 val borderGrey = Color(0xFFE4E7EC)
+val headerCircle = Color(0xFFF0F2F5)
+val darkBlue = Color(0xFF344054)
+val disabledButtonColor = Color(0xFFE7F0FF)
+

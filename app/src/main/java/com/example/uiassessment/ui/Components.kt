@@ -21,11 +21,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.uiassessment.R
 import com.example.uiassessment.bottomBorder
@@ -45,6 +54,7 @@ import com.example.uiassessment.ui.theme.optionBgLight
 import com.example.uiassessment.ui.theme.searchBarColor
 import com.example.uiassessment.ui.theme.LocalFonts
 import com.example.uiassessment.ui.theme.borderGrey
+import com.example.uiassessment.ui.theme.smallTextLight
 import com.example.uiassessment.ui.theme.tagOrange
 import androidx.compose.ui.unit.sp as sp1
 
@@ -85,10 +95,16 @@ fun SearchBar() {
 
 @Composable
 fun OptionElement(text:String,isSelected:Boolean,onSelect:()-> Unit){
-    Box(modifier = Modifier.clip(RoundedCornerShape(4.dp)).clickable {
-        onSelect()
-    }.background(if(isSelected) highlightBlue
-    else optionBgLight).padding(10.dp)){
+    Box(modifier = Modifier
+        .clip(RoundedCornerShape(4.dp))
+        .clickable {
+            onSelect()
+        }
+        .background(
+            if (isSelected) highlightBlue
+            else optionBgLight
+        )
+        .padding(10.dp)){
 
         Text(text, style = if(isSelected) LocalFonts.current.optionTextHighlighted
         else LocalFonts.current.optionText)
@@ -120,7 +136,7 @@ fun FoodCard() {
 
         Column(
             modifier = Modifier
-                 // Padding inside the card
+                // Padding inside the card
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         ) {
@@ -138,7 +154,9 @@ fun FoodCard() {
             )
 
 
-            Column(modifier = Modifier.bottomBorder(1.dp, borderGrey,4.dp).padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Column(modifier = Modifier
+                .bottomBorder(1.dp, borderGrey, 4.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -214,3 +232,118 @@ fun Tag(text: String) {
         )
     }
 }
+
+@Composable
+fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit,modifier: Modifier){
+    OutlinedTextField(
+        value = text,
+        onValueChange = { onTextChange(it)},
+        modifier = modifier,
+        placeholder = {
+            androidx.compose.material3.Text(
+                placeHolder,
+                style = LocalFonts.current.bodyRegularLightAlt // Light Gray placeholder text
+            )
+        },
+        shape = RoundedCornerShape(8.dp), // Rounded corners for input field
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = smallTextLight,
+            focusedBorderColor = smallTextLight,
+            focusedPlaceholderColor = smallTextLight,
+            unfocusedPlaceholderColor = smallTextLight,
+            cursorColor = Color.Black
+        )
+    )
+}
+
+
+@Composable
+fun CustomDescriptionTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit){
+    OutlinedTextField(
+        value = text,
+        onValueChange = { onTextChange(it)},
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(104.dp),
+        placeholder = {
+            androidx.compose.material3.Text(
+                placeHolder,
+                style = LocalFonts.current.bodyRegularLightAlt // Light Gray placeholder text
+            )
+        },
+        shape = RoundedCornerShape(8.dp), // Rounded corners for input field
+        singleLine = false,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = smallTextLight,
+            focusedBorderColor = smallTextLight,
+            focusedPlaceholderColor = smallTextLight,
+            unfocusedPlaceholderColor = smallTextLight,
+            cursorColor = Color.Black
+        )
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Unit){
+
+    val options = listOf("a","b")
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        ExposedDropdownMenuBox(
+            expanded = isExpanded,
+            onExpandedChange = { isExpanded = !isExpanded })
+        {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { },
+                modifier = Modifier
+                    .fillMaxWidth().menuAnchor(),
+                placeholder = {
+                    androidx.compose.material3.Text(
+                        placeHolder,
+                        style = LocalFonts.current.bodyRegularLightAlt // Light Gray placeholder text
+                    )
+                },
+                shape = RoundedCornerShape(8.dp), // Rounded corners for input field
+                singleLine = true, enabled = false,
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = smallTextLight,
+                    focusedBorderColor = smallTextLight,
+                    disabledBorderColor = smallTextLight,
+                    focusedPlaceholderColor = smallTextLight,
+                    unfocusedPlaceholderColor = smallTextLight,
+                    cursorColor = Color.Black
+                )
+            )
+
+            ExposedDropdownMenu(modifier = Modifier.fillMaxWidth(),expanded = isExpanded, onDismissRequest = {isExpanded=false}) {
+                options.forEachIndexed { index, s ->
+
+                    DropdownMenuItem(
+                        text = { androidx.compose.material.Text(s) },
+                        onClick = {
+                            isExpanded = false
+                            onSelect(s)
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+
+
+                }
+
+
+
+            }
+
+        }
+    }
+
+}
+
+
+

@@ -16,11 +16,16 @@ data class Fonts(
     val bodySmallLight:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 12.sp, color = smallTextLight , ),
 
+    val bodyRegularLightAlt:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
+        fontSize = 14.sp, color = smallTextLight , ),
+
     val bodySmallSecondary:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 12.sp, color = secondaryTextLight, ),
 
 
     val bodyRegular:TextStyle =TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
+        fontSize = 14.sp, color = titleBlack, ),
+    val bodyMedium:TextStyle =TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Medium,
         fontSize = 14.sp, color = titleBlack, ),
     val bodyRegularLight:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 14.sp, color = textLight , ),
