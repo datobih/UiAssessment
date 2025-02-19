@@ -112,15 +112,14 @@ fun AddScreen(mainViewModel: MainViewModel,navHostController: NavHostController)
 
             getFileFromUri(context,capturedImageUri)?.let { imageFileList.add(it) }
 
-                // Now you can use the 'file' (File object) or 'capturedImageUri' (Uri)
-                // to work with the captured image.
+
             }
          else {
             println("Image capture failed")
         }
     }
 
-    // 1. Permission Launcher
+    //  Permission Launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -128,9 +127,9 @@ fun AddScreen(mainViewModel: MainViewModel,navHostController: NavHostController)
             // Permission Granted, proceed to open camera
             openCamera(context, capturedImageUri,cameraLauncher,)
         } else {
-            // Permission Denied, handle accordingly (e.g., show explanation)
+
             println("Camera permission denied")
-            // You might want to show a dialog or a Snackbar explaining why you need the permission
+
         }
     }
 
@@ -141,9 +140,9 @@ fun AddScreen(mainViewModel: MainViewModel,navHostController: NavHostController)
             // Permission Granted, proceed to open camera
            galleryLauncher.launch("image/*")
         } else {
-            // Permission Denied, handle accordingly (e.g., show explanation)
+
             println("Read permission denied")
-            // You might want to show a dialog or a Snackbar explaining why you need the permission
+
         }
     }
 
@@ -180,8 +179,8 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         Icon(
                             painter = painterResource(R.drawable.camera),
                             contentDescription = "Back",
-                            tint = darkBlue, // Black arrow icon color
-                            modifier = Modifier.size(24.dp) // Size of the arrow icon itself
+                            tint = darkBlue,
+                            modifier = Modifier.size(24.dp)
                         )
                         Text(
                             "Take photo",
@@ -224,8 +223,8 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         Icon(
                             painter = painterResource(R.drawable.upload),
                             contentDescription = "Back",
-                            tint = darkBlue, // Black arrow icon color
-                            modifier = Modifier.size(24.dp) // Size of the arrow icon itself
+                            tint = darkBlue,
+                            modifier = Modifier.size(24.dp)
                         )
                         Text(
                             "Take photo",
@@ -298,7 +297,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         text = "Name",
                         style = LocalFonts.current.bodyMedium
                     )
-                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    Spacer(modifier = Modifier.height(4.dp))
                     CustomTextField(
                         foodNameState, "Enter food name",
                         { text ->
@@ -322,7 +321,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         text = "Category",
                         style = LocalFonts.current.bodyMedium
                     )
-                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    Spacer(modifier = Modifier.height(4.dp))
                     CustomMenuTextField(categoryState, "Enter Category") {
                         categoryState = it
                     }
@@ -334,7 +333,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         text = "Calories",
                         style = LocalFonts.current.bodyMedium
                     )
-                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    Spacer(modifier = Modifier.height(4.dp))
                     CustomTextField(
                         caloriesState, "Enter number of calories",
                         { text -> caloriesState = text }, modifier = Modifier.fillMaxWidth()
@@ -448,16 +447,16 @@ fun AddNewFoodHeader() {
                 onClick = { /*TODO: Handle back navigation*/ },
                 modifier = Modifier
                     .border(1.dp, headerCircle, CircleShape)
-                    .size(40.dp) // Size of the IconButton and circle
+                    .size(40.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_square_back),
                     contentDescription = "Back",
-                    tint = Color.Black, // Black arrow icon color
-                    modifier = Modifier.size(20.dp) // Size of the arrow icon itself
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp)) // Spacing between back button and text
+            Spacer(modifier = Modifier.width(12.dp))
 
 
             Text(
@@ -470,8 +469,8 @@ fun AddNewFoodHeader() {
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(borderGrey) // Light gray separator line
-             // Indent line to match header padding if needed
+            .background(borderGrey)
+
         )
 
 
