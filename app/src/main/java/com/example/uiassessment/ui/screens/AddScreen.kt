@@ -338,7 +338,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                     CustomTextField(
                         caloriesState, "Enter number of calories",
                         { text -> caloriesState = text }, modifier = Modifier.fillMaxWidth()
-                    )
+                    ,isNumber = true)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -348,6 +348,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     TagsField(tags)
+                    Text("Press enter once you've typed a tag.", style = LocalFonts.current.bodySmallLight)
                 }
 
 
@@ -411,6 +412,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                LaunchedEffect(true) {
                    mainViewModel.getFoods()
                    navHostController.popBackStack()
+
 
                 }
 

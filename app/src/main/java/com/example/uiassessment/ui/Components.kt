@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -43,6 +44,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
@@ -249,7 +251,7 @@ fun Tag(text: String) {
 }
 
 @Composable
-fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit,modifier: Modifier){
+fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit,modifier: Modifier,isNumber: Boolean = false){
     OutlinedTextField(
         value = text,textStyle = LocalFonts.current.bodyRegular,
         onValueChange = { onTextChange(it)},
@@ -268,7 +270,7 @@ fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Un
             focusedPlaceholderColor = smallTextLight,
             unfocusedPlaceholderColor = smallTextLight,
             cursorColor = Color.Black
-        )
+        ),keyboardOptions = KeyboardOptions(keyboardType = if(isNumber) KeyboardType.Number else KeyboardType.Unspecified)
     )
 }
 
@@ -333,7 +335,8 @@ fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Un
                     focusedPlaceholderColor = smallTextLight,
                     unfocusedPlaceholderColor = smallTextLight,
                     cursorColor = Color.Black
-                )
+                ),
+
             )
 
             ExposedDropdownMenu(modifier = Modifier.fillMaxWidth(),expanded = isExpanded, onDismissRequest = {isExpanded=false}) {
@@ -390,7 +393,8 @@ fun TagsField(tags:SnapshotStateList<String>) {
                         tags.add(tagText)
                         textState = "" // Clear input after adding
                     }})
-            )
+            , keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
 
         }
 
