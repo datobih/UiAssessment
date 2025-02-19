@@ -1,6 +1,6 @@
 ## Libraries Used
 
-This project leverages the following libraries to enhance functionality and development efficiency.
+I used the following libraries when working on this project.
 
 **Jetpack Compose UI & Material Design:**
 
