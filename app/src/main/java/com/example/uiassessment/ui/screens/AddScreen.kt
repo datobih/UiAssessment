@@ -1,9 +1,17 @@
 package com.example.uiassessment.ui.screens
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,26 +21,39 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
 import com.example.uiassessment.R
+import com.example.uiassessment.createImageUri
+
+import com.example.uiassessment.getFileFromUri
+import com.example.uiassessment.openCamera
 import com.example.uiassessment.ui.CustomDescriptionTextField
 import com.example.uiassessment.ui.CustomMenuTextField
 import com.example.uiassessment.ui.CustomTextField
@@ -44,6 +65,7 @@ import com.example.uiassessment.ui.theme.disabledButtonColor
 import com.example.uiassessment.ui.theme.headerCircle
 import com.example.uiassessment.ui.theme.highlightBlue
 import com.example.uiassessment.ui.theme.smallTextLight
+import java.io.File
 
 @Composable
 fun AddScreen(){
@@ -52,7 +74,71 @@ fun AddScreen(){
     var descriptionState by remember { mutableStateOf("") }
     var categoryState by remember { mutableStateOf("") }
     var caloriesState by remember { mutableStateOf("") }
-    var tagsState by remember { mutableStateOf("") }
+    val tags = remember { mutableStateListOf<String>() }
+
+    val imageFileList = remember { mutableStateListOf<File>() }
+    val isInputValid = (foodNameState.isNotEmpty() && descriptionState.isNotEmpty()
+            && categoryState.isNotEmpty()&& caloriesState.isNotEmpty() && tags.isNotEmpty() && imageFileList.isNotEmpty())
+
+    val context = LocalContext.current
+
+    val capturedImageUri by remember { mutableStateOf( createImageUri(context))}
+
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri?->
+
+        uri?.let {
+
+            getFileFromUri(context,uri)?.let { it1 -> imageFileList.add(it1) }
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+
+            getFileFromUri(context,capturedImageUri)?.let { imageFileList.add(it) }
+
+                // Now you can use the 'file' (File object) or 'capturedImageUri' (Uri)
+                // to work with the captured image.
+            }
+         else {
+            println("Image capture failed")
+        }
+    }
+
+    // 1. Permission Launcher
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission Granted, proceed to open camera
+            openCamera(context, capturedImageUri,cameraLauncher,)
+        } else {
+            // Permission Denied, handle accordingly (e.g., show explanation)
+            println("Camera permission denied")
+            // You might want to show a dialog or a Snackbar explaining why you need the permission
+        }
+    }
+
+    val readPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission Granted, proceed to open camera
+           galleryLauncher.launch("image/*")
+        } else {
+            // Permission Denied, handle accordingly (e.g., show explanation)
+            println("Read permission denied")
+            // You might want to show a dialog or a Snackbar explaining why you need the permission
+        }
+    }
+
+
 
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -67,7 +153,13 @@ fun AddScreen(){
                 Column(modifier = Modifier
                     .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
                     .clickable {
-
+                        if (context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            // Permission already granted, open camera directly
+                            openCamera(context, capturedImageUri, cameraLauncher)
+                        } else {
+                            // Permission not granted, request it
+                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
                     }
                     .weight(1f)
                     .padding(vertical = 20.dp),
@@ -96,6 +188,24 @@ fun AddScreen(){
                     .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
                     .clickable {
 
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (context.checkSelfPermission(READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED){
+                                galleryLauncher.launch("image/*")
+                            }
+                            else{
+                                readPermissionLauncher.launch(READ_MEDIA_IMAGES)
+                            }
+
+                    } else {
+                            if (context.checkSelfPermission(READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED){
+                                galleryLauncher.launch("image/*")
+                            }
+                            else{
+                                readPermissionLauncher.launch(READ_EXTERNAL_STORAGE)
+                            }
+
+                    }
+
                     }
                     .weight(1f)
                     .padding(vertical = 20.dp),
@@ -120,6 +230,45 @@ fun AddScreen(){
 
             }
 
+
+            if(imageFileList.isNotEmpty()){
+                LazyRow(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 3.dp, start = 16.dp, end = 16.dp)) {
+
+                    items(imageFileList.toList()){ uri->
+
+
+                        Box(modifier = Modifier.size(50.dp)) {
+                            SubcomposeAsyncImage(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .fillMaxSize(), loading = {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color = Color.Black, modifier = Modifier.width(20.dp)
+                                        )
+                                    }
+                                }, model = ImageRequest.Builder(LocalContext.current)
+                                    .data(uri).build(), contentDescription = "Image",
+                                contentScale = ContentScale.Crop
+                            )
+
+
+                            Image(painter = painterResource(R.drawable.image_cancel), modifier = Modifier.padding(end = 4.dp, bottom = 4.dp)
+                                .clickable { imageFileList.remove(uri) }
+                                .size(16.dp).align(Alignment.BottomEnd)
+                                , contentDescription = "")
+                        }
+                        Spacer(modifier = Modifier.width(3.dp))
+                    }
+
+                }
+
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -180,10 +329,8 @@ fun AddScreen(){
                     style = LocalFonts.current.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                TagsField()
+                TagsField(tags)
             }
-
-
 
 
             Button(
@@ -194,14 +341,15 @@ fun AddScreen(){
                     disabledContainerColor = disabledButtonColor,
                     disabledContentColor = smallTextLight
                 ),
-                enabled = false,
-                modifier = Modifier.padding(top = 80.dp, bottom = 16.dp)
+                enabled = isInputValid,
+                modifier = Modifier
+                    .padding(top = 80.dp, bottom = 16.dp)
                     .fillMaxWidth(.93f)
                     .align(Alignment.CenterHorizontally),
                 shape = RoundedCornerShape(4.dp)
             ) {
 
-                Text("Add food", modifier = Modifier.padding(vertical = 6.dp), style = LocalFonts.current.bodyRegularLightAlt)
+                Text("Add food", modifier = Modifier.padding(vertical = 6.dp), style = if(isInputValid) LocalFonts.current.bodyRegularWhite else LocalFonts.current.bodyRegularLightAlt)
 
             }
 

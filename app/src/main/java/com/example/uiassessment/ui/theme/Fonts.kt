@@ -18,6 +18,8 @@ data class Fonts(
 
     val bodyRegularLightAlt:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 14.sp, color = smallTextLight , ),
+    val bodyRegularWhite:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
+        fontSize = 14.sp, color = Color.White , ),
 
     val bodySmallSecondary:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 12.sp, color = secondaryTextLight, ),

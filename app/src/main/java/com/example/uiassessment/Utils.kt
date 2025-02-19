@@ -2,6 +2,11 @@ package com.example.uiassessment
 
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -14,6 +19,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -44,6 +56,60 @@ sealed class WindowType {
     object Compact : WindowType()
     object Medium : WindowType()
     object Expanded : WindowType()
+}
+
+
+fun openCamera(context: Context, uri: Uri, cameraLauncher: ActivityResultLauncher<Uri>) {
+    val tempFile = createImageFile(context)
+
+    cameraLauncher.launch(uri) // Launch the camera intent with the URI
+}
+
+fun createImageFile(context: Context): File {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val imageFileName = "JPEG_${timeStamp}_"
+    val storageDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+    return File.createTempFile(
+        imageFileName, /* prefix */
+        ".jpg", /* suffix */
+        storageDir /* directory */
+    )
+}
+
+
+
+fun createImageUri(context: Context): Uri {
+    val imageFile = File.createTempFile("captured_${System.currentTimeMillis()}",".jpg",context.cacheDir)
+
+    return FileProvider.getUriForFile(context,"${context.packageName}.provider",imageFile)
+}
+
+
+fun getFileFromUri(context: Context, uri: Uri?): File? {
+    if (uri == null) {
+        return null // Handle null Uri gracefully
+    }
+
+    return try {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        inputStream?.use { input ->
+            val tempFile = createTempFileForUpload(context) // Create a temporary file
+            FileOutputStream(tempFile).use { output ->
+                input.copyTo(output) // Copy data from InputStream to FileOutputStream
+            }
+            tempFile // Return the temporary file
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null // Handle exceptions and return null if file creation fails
+    }
+}
+
+private fun createTempFileForUpload(context: Context): File {
+    val timeStamp = System.currentTimeMillis().toString()
+    val imageFileName = "UPLOAD_TEMP_IMG_${timeStamp}"
+    val storageDir = context.cacheDir // Use app's cache directory for temporary files
+    return File.createTempFile(imageFileName, ".jpg", storageDir) // Create .jpg temp file
 }
 
 

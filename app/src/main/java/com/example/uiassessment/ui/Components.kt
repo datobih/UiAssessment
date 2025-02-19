@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -244,7 +245,7 @@ fun Tag(text: String) {
 @Composable
 fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit,modifier: Modifier){
     OutlinedTextField(
-        value = text,
+        value = text,textStyle = LocalFonts.current.bodyRegular,
         onValueChange = { onTextChange(it)},
         modifier = modifier,
         placeholder = {
@@ -269,7 +270,7 @@ fun CustomTextField(text: String,placeHolder:String,onTextChange: (String) -> Un
 @Composable
 fun CustomDescriptionTextField(text: String,placeHolder:String,onTextChange: (String) -> Unit){
     OutlinedTextField(
-        value = text,
+        value = text,textStyle = LocalFonts.current.bodyRegular,
         onValueChange = { onTextChange(it)},
         modifier = Modifier
             .fillMaxWidth()
@@ -307,7 +308,7 @@ fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Un
             onExpandedChange = { isExpanded = !isExpanded })
         {
             OutlinedTextField(
-                value = text,
+                value = text,textStyle = LocalFonts.current.bodyRegular,
                 onValueChange = { },
                 modifier = Modifier
                     .fillMaxWidth().menuAnchor(),
@@ -355,13 +356,12 @@ fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Un
 
 
 @Composable
-fun TagsField() {
-    val tags = remember { mutableStateListOf<String>() } // State to hold the tags
+fun TagsField(tags:SnapshotStateList<String>) {
     var textState by remember { mutableStateOf("") } // State for the input text
 
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
-                value = textState,
+                value = textState, textStyle = LocalFonts.current.bodyRegular,
                 onValueChange = { textState = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
