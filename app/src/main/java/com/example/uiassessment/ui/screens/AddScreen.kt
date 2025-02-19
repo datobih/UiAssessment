@@ -61,6 +61,7 @@ import com.example.uiassessment.createImageUri
 
 import com.example.uiassessment.getFileFromUri
 import com.example.uiassessment.models.FoodRequestDTO
+import com.example.uiassessment.navigation.HomeRef
 import com.example.uiassessment.openCamera
 import com.example.uiassessment.ui.CustomDescriptionTextField
 import com.example.uiassessment.ui.CustomMenuTextField
@@ -407,7 +408,11 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                         Toast.makeText(context, "Food Added",Toast.LENGTH_SHORT).show()
                     }
 
-               LaunchedEffect(true) { navHostController.popBackStack() }
+               LaunchedEffect(true) {
+                   mainViewModel.getFoods()
+                   navHostController.popBackStack()
+
+                }
 
 
                 }
