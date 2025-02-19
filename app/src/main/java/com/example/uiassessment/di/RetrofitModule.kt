@@ -1,7 +1,6 @@
 package com.example.lostandfound.di
 
 import com.example.lostandfound.retrofit.NetworkAPIService
-import com.example.lostandfound.utils.Constants
 import com.example.uiassessment.BASE_URL
 import com.google.gson.Gson
 import dagger.Module
@@ -18,8 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class RetrofitModule {
-
-
     @Singleton
     @Provides
     fun providesClient(): OkHttpClient {

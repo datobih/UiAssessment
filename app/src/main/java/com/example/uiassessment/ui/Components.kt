@@ -298,7 +298,7 @@ fun CustomDescriptionTextField(text: String,placeHolder:String,onTextChange: (St
 @Composable
 fun CustomMenuTextField(text: String,placeHolder:String,onSelect: (String) -> Unit){
 
-    val options = listOf("a","b")
+    val options = listOf("1","2","3","4","5")
     var isExpanded by remember {
         mutableStateOf(false)
     }

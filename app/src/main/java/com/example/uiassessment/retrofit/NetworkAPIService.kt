@@ -16,15 +16,14 @@ interface NetworkAPIService {
 
 
     @Multipart
-    @POST("api/create-lost-item/")
+    @POST("api/foods")
     fun postAddItem(
-        @Header("AUTHORIZATION") tokenVal: String,
                     @Part images : List<MultipartBody.Part>,
                     @Part("name") name: RequestBody,
                     @Part("description") description: RequestBody,
                     @Part("category_id") categoryId: RequestBody,
                     @Part("calories") calories: RequestBody,
-                    @Part("tags") tags:List<MultipartBody.Part>):Call<Any>
+                    @Part("tags[]") tags:ArrayList<RequestBody>):Call<Any>
 
 
 }

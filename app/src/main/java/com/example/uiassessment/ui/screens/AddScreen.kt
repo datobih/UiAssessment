@@ -1,9 +1,12 @@
 package com.example.uiassessment.ui.screens
 
+import android.Manifest
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -35,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,12 +51,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
+import com.example.lostandfound.utils.UIState
 import com.example.uiassessment.R
 import com.example.uiassessment.createImageUri
 
 import com.example.uiassessment.getFileFromUri
+import com.example.uiassessment.models.FoodDTO
 import com.example.uiassessment.openCamera
 import com.example.uiassessment.ui.CustomDescriptionTextField
 import com.example.uiassessment.ui.CustomMenuTextField
@@ -65,10 +72,11 @@ import com.example.uiassessment.ui.theme.disabledButtonColor
 import com.example.uiassessment.ui.theme.headerCircle
 import com.example.uiassessment.ui.theme.highlightBlue
 import com.example.uiassessment.ui.theme.smallTextLight
+import com.example.uiassessment.viewmodel.MainViewModel
 import java.io.File
 
 @Composable
-fun AddScreen(){
+fun AddScreen(mainViewModel: MainViewModel,navHostController: NavHostController){
 
     var foodNameState by remember { mutableStateOf("") }
     var descriptionState by remember { mutableStateOf("") }
@@ -138,220 +146,270 @@ fun AddScreen(){
         }
     }
 
+val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
 
 
+    Column() {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                AddNewFoodHeader()
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            AddNewFoodHeader()
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-            ) {
-                Column(modifier = Modifier
-                    .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
-                    .clickable {
-                        if (context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            // Permission already granted, open camera directly
-                            openCamera(context, capturedImageUri, cameraLauncher)
-                        } else {
-                            // Permission not granted, request it
-                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                ) {
+                    Column(modifier = Modifier
+                        .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
+                        .clickable {
+                            if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                // Permission already granted, open camera directly
+                                openCamera(context, capturedImageUri, cameraLauncher)
+                            } else {
+                                // Permission not granted, request it
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
                         }
+                        .weight(1f)
+                        .padding(vertical = 20.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Icon(
+                            painter = painterResource(R.drawable.camera),
+                            contentDescription = "Back",
+                            tint = darkBlue, // Black arrow icon color
+                            modifier = Modifier.size(24.dp) // Size of the arrow icon itself
+                        )
+                        Text(
+                            "Take photo",
+                            style = LocalFonts.current.bodyRegular,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+
+
                     }
-                    .weight(1f)
-                    .padding(vertical = 20.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Column(modifier = Modifier
+                        .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
+                        .clickable {
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (context.checkSelfPermission(READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                                    galleryLauncher.launch("image/*")
+                                } else {
+                                    readPermissionLauncher.launch(READ_MEDIA_IMAGES)
+                                }
+
+                            } else {
+                                if (context.checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                                    galleryLauncher.launch("image/*")
+                                } else {
+                                    readPermissionLauncher.launch(READ_EXTERNAL_STORAGE)
+                                }
+
+                            }
+
+                        }
+                        .weight(1f)
+                        .padding(vertical = 20.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Icon(
+                            painter = painterResource(R.drawable.upload),
+                            contentDescription = "Back",
+                            tint = darkBlue, // Black arrow icon color
+                            modifier = Modifier.size(24.dp) // Size of the arrow icon itself
+                        )
+                        Text(
+                            "Take photo",
+                            style = LocalFonts.current.bodyRegular,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+
+
+                    }
+
+                }
+
+
+                if (imageFileList.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 3.dp, start = 16.dp, end = 16.dp)
+                    ) {
+
+                        items(imageFileList.toList()) { uri ->
+
+
+                            Box(modifier = Modifier.size(50.dp)) {
+                                SubcomposeAsyncImage(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .fillMaxSize(), loading = {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(
+                                                color = Color.Black,
+                                                modifier = Modifier.width(20.dp)
+                                            )
+                                        }
+                                    }, model = ImageRequest.Builder(LocalContext.current)
+                                        .data(uri).build(), contentDescription = "Image",
+                                    contentScale = ContentScale.Crop
+                                )
+
+
+                                Image(painter = painterResource(R.drawable.image_cancel),
+                                    modifier = Modifier
+                                        .padding(end = 4.dp, bottom = 4.dp)
+                                        .clickable { imageFileList.remove(uri) }
+                                        .size(16.dp)
+                                        .align(Alignment.BottomEnd),
+                                    contentDescription = "")
+                            }
+                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+
+                    }
+
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Name",
+                        style = LocalFonts.current.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    CustomTextField(
+                        foodNameState, "Enter food name",
+                        { text ->
+                            foodNameState = text
+                        }, modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Description",
+                        style = LocalFonts.current.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CustomDescriptionTextField(
+                        descriptionState, "Enter food description",
+                        { text -> descriptionState = text },
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Category",
+                        style = LocalFonts.current.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    CustomMenuTextField(categoryState, "Enter Category") {
+                        categoryState = it
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+
+                    Text(
+                        text = "Calories",
+                        style = LocalFonts.current.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
+                    CustomTextField(
+                        caloriesState, "Enter number of calories",
+                        { text -> caloriesState = text }, modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Tags",
+                        style = LocalFonts.current.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    TagsField(tags)
+                }
+
+
+                Button(
+                    onClick = {
+
+                        mainViewModel.createFoodRequest(FoodDTO(name = foodNameState,description = descriptionState,
+                            calories = caloriesState, tags = tags, images = imageFileList, categoryId = categoryState))
+
+                    },
+                    colors = ButtonColors(
+                        containerColor = highlightBlue,
+                        contentColor = Color.White,
+                        disabledContainerColor = disabledButtonColor,
+                        disabledContentColor = smallTextLight
+                    ),
+                    enabled = isInputValid,
+                    modifier = Modifier
+                        .padding(top = 80.dp, bottom = 16.dp)
+                        .fillMaxWidth(.93f)
+                        .align(Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(4.dp)
                 ) {
 
-                    Icon(
-                        painter = painterResource(R.drawable.camera),
-                        contentDescription = "Back",
-                        tint = darkBlue, // Black arrow icon color
-                        modifier = Modifier.size(24.dp) // Size of the arrow icon itself
-                    )
                     Text(
-                        "Take photo",
-                        style = LocalFonts.current.bodyRegular,
-                        modifier = Modifier.padding(top = 4.dp)
+                        "Add food",
+                        modifier = Modifier.padding(vertical = 6.dp),
+                        style = if (isInputValid) LocalFonts.current.bodyRegularWhite else LocalFonts.current.bodyRegularLightAlt
+                    )
+
+                }
+            }
+            when(createFoodState){
+
+                is UIState.LoadingState -> { Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x4BFFFFFF)).clickable{
+
+                    }, contentAlignment = Alignment.Center){
+
+                    CircularProgressIndicator(
+                        color = Color.Black,
+                        modifier = Modifier
+                            .width(40.dp)
+                            .align(Alignment.Center)
                     )
 
 
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Column(modifier = Modifier
-                    .border(1.dp, headerCircle, RoundedCornerShape(4.dp))
-                    .clickable {
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            if (context.checkSelfPermission(READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED){
-                                galleryLauncher.launch("image/*")
-                            }
-                            else{
-                                readPermissionLauncher.launch(READ_MEDIA_IMAGES)
-                            }
-
-                    } else {
-                            if (context.checkSelfPermission(READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED){
-                                galleryLauncher.launch("image/*")
-                            }
-                            else{
-                                readPermissionLauncher.launch(READ_EXTERNAL_STORAGE)
-                            }
-
-                    }
-
-                    }
-                    .weight(1f)
-                    .padding(vertical = 20.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Icon(
-                        painter = painterResource(R.drawable.upload),
-                        contentDescription = "Back",
-                        tint = darkBlue, // Black arrow icon color
-                        modifier = Modifier.size(24.dp) // Size of the arrow icon itself
-                    )
-                    Text(
-                        "Take photo",
-                        style = LocalFonts.current.bodyRegular,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-
+                }}
+                is UIState.ErrorState -> {Toast.makeText(context, (createFoodState as UIState.ErrorState).data,Toast.LENGTH_SHORT).show()}
+                is UIState.SuccessState -> {  Toast.makeText(context, "Food Added",Toast.LENGTH_SHORT).show()
+                navHostController.popBackStack()
 
                 }
+                is UIState.InitialState -> {
 
+                }
+                null -> {
+
+                }
             }
 
 
-            if(imageFileList.isNotEmpty()){
-                LazyRow(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 3.dp, start = 16.dp, end = 16.dp)) {
-
-                    items(imageFileList.toList()){ uri->
-
-
-                        Box(modifier = Modifier.size(50.dp)) {
-                            SubcomposeAsyncImage(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .fillMaxSize(), loading = {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(
-                                            color = Color.Black, modifier = Modifier.width(20.dp)
-                                        )
-                                    }
-                                }, model = ImageRequest.Builder(LocalContext.current)
-                                    .data(uri).build(), contentDescription = "Image",
-                                contentScale = ContentScale.Crop
-                            )
-
-
-                            Image(painter = painterResource(R.drawable.image_cancel), modifier = Modifier.padding(end = 4.dp, bottom = 4.dp)
-                                .clickable { imageFileList.remove(uri) }
-                                .size(16.dp).align(Alignment.BottomEnd)
-                                , contentDescription = "")
-                        }
-                        Spacer(modifier = Modifier.width(3.dp))
-                    }
-
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-
-
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)) {
-                Text(
-                    text = "Name",
-                    style = LocalFonts.current.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
-                CustomTextField(foodNameState, "Enter food name",
-                    { text ->
-                        foodNameState = text
-                    }, modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Description",
-                    style = LocalFonts.current.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                CustomDescriptionTextField(
-                    descriptionState, "Enter food description",
-                    { text -> descriptionState = text },
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Category",
-                    style = LocalFonts.current.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
-                CustomMenuTextField(categoryState, "Enter Category") {
-                    categoryState = it
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-                Text(
-                    text = "Calories",
-                    style = LocalFonts.current.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp)) // Spacing between label and input field
-                CustomTextField(caloriesState, "Enter number of calories",
-                    { text -> caloriesState = text }, modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Tags",
-                    style = LocalFonts.current.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                TagsField(tags)
-            }
-
-
-            Button(
-                onClick = {},
-                colors = ButtonColors(
-                    containerColor = highlightBlue,
-                    contentColor = Color.White,
-                    disabledContainerColor = disabledButtonColor,
-                    disabledContentColor = smallTextLight
-                ),
-                enabled = isInputValid,
-                modifier = Modifier
-                    .padding(top = 80.dp, bottom = 16.dp)
-                    .fillMaxWidth(.93f)
-                    .align(Alignment.CenterHorizontally),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-
-                Text("Add food", modifier = Modifier.padding(vertical = 6.dp), style = if(isInputValid) LocalFonts.current.bodyRegularWhite else LocalFonts.current.bodyRegularLightAlt)
-
-            }
 
         }
     }
