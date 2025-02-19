@@ -20,6 +20,8 @@ data class Fonts(
         fontSize = 14.sp, color = smallTextLight , ),
     val bodyRegularWhite:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 14.sp, color = Color.White , ),
+    val bodyRegularBoldWhite:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Bold,
+        fontSize = 14.sp, color = Color.White , ),
 
     val bodySmallSecondary:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 12.sp, color = secondaryTextLight, ),
@@ -39,7 +41,7 @@ data class Fonts(
     val optionText:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Normal,
         fontSize = 14.sp, color = optionTextLight , ),
     val optionTextHighlighted:TextStyle = TextStyle(fontFamily = Satoshi, fontWeight = FontWeight.Medium,
-        fontSize = 14.sp, color = Color.White)
+        fontSize = 13.sp, color = Color.White)
 
 
 )

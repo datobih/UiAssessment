@@ -15,27 +15,37 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.FloatingActionButton
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.lostandfound.utils.UIState
 import com.example.uiassessment.R
+import com.example.uiassessment.models.FoodDTO
+import com.example.uiassessment.models.FoodRequestDTO
+import com.example.uiassessment.models.FoodResponseDTO
 import com.example.uiassessment.navigation.AddFoodRef
 import com.example.uiassessment.rememberWindowSize
 import com.example.uiassessment.ui.FoodCard
@@ -43,16 +53,20 @@ import com.example.uiassessment.ui.SearchBar
 import com.example.uiassessment.ui.SelectableOptionsSection
 
 import com.example.uiassessment.ui.theme.LocalFonts
+import com.example.uiassessment.ui.theme.disabledButtonColor
+import com.example.uiassessment.ui.theme.highlightBlue
 import com.example.uiassessment.ui.theme.searchBarColor
 import com.example.uiassessment.ui.theme.smallTextLight
+import com.example.uiassessment.ui.theme.titleBlack
+import com.example.uiassessment.viewmodel.MainViewModel
 
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(mainViewModel: MainViewModel, navController: NavHostController) {
     val context = LocalContext.current
     var selectedPosition  by rememberSaveable { mutableStateOf(1) }
 
-
+    val getFoodsState by mainViewModel.getFoodsLiveData.observeAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -121,7 +135,7 @@ fun HomeScreen(navController: NavHostController) {
             )
 
             Spacer(modifier = Modifier.padding(top = 10.dp))
-            SearchBar()
+            SearchBar({mainViewModel.filterFoods(it)})
 
             Spacer(modifier = Modifier.padding(top = 10.dp))
             SelectableOptionsSection(selectedPosition) { selectedPosition = it }
@@ -137,17 +151,98 @@ fun HomeScreen(navController: NavHostController) {
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
             )
 
-            LazyColumn {
-                items(5) {
-                    FoodCard()
+
+            when(getFoodsState){
+                is UIState.ErrorState -> {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "Something went wrong", style = LocalFonts.current.title)
+
+                        Button(
+                            onClick = {
+
+                                mainViewModel.getFoods()
+
+                            },
+                            colors = ButtonColors(
+                                containerColor = highlightBlue,
+                                contentColor = Color.White,
+                                disabledContainerColor = disabledButtonColor,
+                                disabledContentColor = smallTextLight
+                            ),
+
+                            modifier = Modifier
+                                .padding(top = 30.dp)
+                                .fillMaxWidth(.4f)
+                                .align(Alignment.CenterHorizontally),
+
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+
+                            androidx.compose.material3.Text(
+                                "Try Again",
+                                modifier = Modifier.padding(vertical = 6.dp),
+                                style =  LocalFonts.current.bodyRegularBoldWhite
+                            )
+
+                        }
+
+
+                    }
                 }
+                is UIState.InitialState -> {
+                  LaunchedEffect(getFoodsState) {
+                      mainViewModel.getFoods()
+                  }
+                }
+                is UIState.LoadingState -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                        CircularProgressIndicator(
+                            color = Color.Black,
+                            modifier = Modifier
+                                .width(40.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
+                is UIState.SuccessState -> {
+
+                    (getFoodsState as UIState.SuccessState<FoodResponseDTO?>).data?.let {
+                        foodResponse->
+                        LaunchedEffect(true) {
+                            mainViewModel.filteredFoods.clear()
+                            mainViewModel.filteredFoods.addAll(foodResponse.data)
+                        }
+
+                        if(!(mainViewModel.filteredFoods.isNullOrEmpty())){
+                            LazyColumn {
+                                items(mainViewModel.filteredFoods.toList()) {
+                                    FoodCard(it)
+
+                                }
 
 
+                            }
+                        }
+                        else{
+
+                        }
+                    }
+
+
+
+                }
+                else -> {}
             }
+
         }
 
         Icon(painter = painterResource(R.drawable.add_square),
-            modifier = Modifier.padding(40.dp).size(56.dp).clickable { navController.navigate(AddFoodRef) }.align(Alignment.BottomEnd),
+            modifier = Modifier
+                .padding(40.dp)
+                .size(56.dp)
+                .clickable { navController.navigate(AddFoodRef) }
+                .align(Alignment.BottomEnd),
            contentDescription = "Add Food")
 
 

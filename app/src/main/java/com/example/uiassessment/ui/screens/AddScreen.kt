@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -59,7 +60,7 @@ import com.example.uiassessment.R
 import com.example.uiassessment.createImageUri
 
 import com.example.uiassessment.getFileFromUri
-import com.example.uiassessment.models.FoodDTO
+import com.example.uiassessment.models.FoodRequestDTO
 import com.example.uiassessment.openCamera
 import com.example.uiassessment.ui.CustomDescriptionTextField
 import com.example.uiassessment.ui.CustomMenuTextField
@@ -353,7 +354,7 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
                 Button(
                     onClick = {
 
-                        mainViewModel.createFoodRequest(FoodDTO(name = foodNameState,description = descriptionState,
+                        mainViewModel.createFoodRequest(FoodRequestDTO(name = foodNameState,description = descriptionState,
                             calories = caloriesState, tags = tags, images = imageFileList, categoryId = categoryState))
 
                     },
@@ -396,9 +397,19 @@ val createFoodState by mainViewModel.createFoodRequestLiveData.observeAsState()
 
 
                 }}
-                is UIState.ErrorState -> {Toast.makeText(context, (createFoodState as UIState.ErrorState).data,Toast.LENGTH_SHORT).show()}
-                is UIState.SuccessState -> {  Toast.makeText(context, "Food Added",Toast.LENGTH_SHORT).show()
-                navHostController.popBackStack()
+                is UIState.ErrorState -> {
+                    LaunchedEffect(true){
+                        Toast.makeText(context, (createFoodState as UIState.ErrorState).data,Toast.LENGTH_SHORT).show()
+                    }
+                    }
+                is UIState.SuccessState -> {
+
+                    LaunchedEffect(true){
+                        Toast.makeText(context, "Food Added",Toast.LENGTH_SHORT).show()
+                    }
+
+               LaunchedEffect(true) { navHostController.popBackStack() }
+
 
                 }
                 is UIState.InitialState -> {

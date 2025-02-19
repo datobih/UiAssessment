@@ -21,7 +21,7 @@ object AddFoodRef
 fun BaseNavHost(mainViewModel: MainViewModel){
     val navController = rememberNavController()
     NavHost(navController, startDestination = HomeRef){
-        composable<HomeRef> { HomeScreen(navController)  }
+        composable<HomeRef> { HomeScreen(mainViewModel,navController)  }
         composable<AddFoodRef> { AddScreen(mainViewModel,navController)  }
     }
 

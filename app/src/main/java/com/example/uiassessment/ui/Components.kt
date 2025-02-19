@@ -1,8 +1,6 @@
 package com.example.uiassessment.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,22 +19,18 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,35 +38,36 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
 import com.example.uiassessment.R
 import com.example.uiassessment.bottomBorder
-import com.example.uiassessment.topBorder
+import com.example.uiassessment.models.FoodDTO
 import com.example.uiassessment.ui.theme.highlightBlue
 import com.example.uiassessment.ui.theme.optionBgLight
 import com.example.uiassessment.ui.theme.searchBarColor
 import com.example.uiassessment.ui.theme.LocalFonts
 import com.example.uiassessment.ui.theme.borderGrey
+import com.example.uiassessment.ui.theme.searchIconColor
 import com.example.uiassessment.ui.theme.smallTextLight
 import com.example.uiassessment.ui.theme.tagGray
 import com.example.uiassessment.ui.theme.tagOrange
 import androidx.compose.ui.unit.sp as sp1
 
 @Composable
-fun SearchBar() {
+fun SearchBar(onTextChange: (String) -> Unit) {
     val searchText = remember { mutableStateOf("") }
 
     TextField(
         value = searchText.value,
-        onValueChange = { searchText.value = it },
+        onValueChange = { searchText.value = it
+                        onTextChange(it)},
         modifier = Modifier
 
             .fillMaxWidth()
@@ -81,9 +75,9 @@ fun SearchBar() {
         placeholder = { Text("Search foods...", style = LocalFonts.current.bodyRegularLight) }, // Hint text
         leadingIcon = {
             Icon(
-                Icons.Filled.Search,
+                painter = painterResource(R.drawable.search_normal),
                 contentDescription = "Search Icon",
-                tint = Color.Gray // Icon color
+                tint = searchIconColor // Icon color
             )
         },
         singleLine = true,
@@ -127,13 +121,13 @@ fun OptionElement(text:String,isSelected:Boolean,onSelect:()-> Unit){
 @Composable
 fun SelectableOptionsSection(selectedPosition: Int,onOptionSelected: (Int) -> Unit) {
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-        OptionElement(text = "Option 1", isSelected = selectedPosition == 1, onSelect = {onOptionSelected(1)})
+        OptionElement(text = "All", isSelected = selectedPosition == 1, onSelect = {onOptionSelected(1)})
 
-        OptionElement(text = "Option 2", isSelected = selectedPosition == 2, onSelect = {onOptionSelected(2)})
+        OptionElement(text = "Morning Feast", isSelected = selectedPosition == 2, onSelect = {onOptionSelected(2)})
 
-        OptionElement(text = "Option 3", isSelected = selectedPosition == 3, onSelect = {onOptionSelected(3)})
+        OptionElement(text = "Sunrise Meal", isSelected = selectedPosition == 3, onSelect = {onOptionSelected(3)})
 
-        OptionElement(text = "Option 4", isSelected = selectedPosition == 4, onSelect = {onOptionSelected(4)})
+        OptionElement(text = "Dawn Delicacies", isSelected = selectedPosition == 4, onSelect = {onOptionSelected(4)})
     }
 }
 
@@ -141,7 +135,7 @@ fun SelectableOptionsSection(selectedPosition: Int,onOptionSelected: (Int) -> Un
 
 
 @Composable
-fun FoodCard() {
+fun FoodCard(foodResponseDTO: FoodDTO) {
 
         Column(
             modifier = Modifier
@@ -150,17 +144,27 @@ fun FoodCard() {
                 .padding(bottom = 16.dp)
         ) {
             // "All Foods" Header
-
-            // Food Image
-            Image(
-                painter = painterResource(id = R.drawable.lucy), // Replace with your image resource
-                contentDescription = "Garlic Butter Shrimp Pasta",
+            SubcomposeAsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(137.dp) // Adjust height as needed
-                    .clip(RoundedCornerShape(8.dp)), // Rounded corners for image
+                    .clip(RoundedCornerShape(8.dp)), // Rounded corners for image,
+                 loading = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color.Black,
+                            modifier = Modifier.width(20.dp)
+                        )
+                    }
+                }, model = ImageRequest.Builder(LocalContext.current)
+                    .data(foodResponseDTO.foodImages[0].image).build(), contentDescription = "Image",
                 contentScale = ContentScale.Crop
             )
+
+
 
 
             Column(modifier = Modifier
@@ -173,7 +177,7 @@ fun FoodCard() {
                 ) {
                     // Food Title
                     Text(
-                        text = "Garlic Butter Shrimp Pasta",
+                        text = foodResponseDTO.name,
                         style = LocalFonts.current.titleBold,
                     )
                     // Heart Icon
@@ -198,7 +202,7 @@ fun FoodCard() {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "320 Calories",
+                        text = "${foodResponseDTO.calories} Calories",
                         style = LocalFonts.current.bodySmallSecondary
                     )
                 }
@@ -207,15 +211,17 @@ fun FoodCard() {
 
                 // Description Text
                 Text(
-                    text = "Creamy hummus spread on whole grain toast topped with sliced cucumbers and radishes.",
+                    text = foodResponseDTO.description,
                     style = LocalFonts.current.bodySmall,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
                 // Tags Row
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Tag(text = "healthy") // Light Teal for "healthy" tag
-                    Tag(text = "vegetarian") // Light Pink for "vegetarian" tag
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(foodResponseDTO.foodTags){ tag ->
+                        Tag(text = tag) // Light Teal for "healthy" tag
+                    }
+
                 }
             }
 

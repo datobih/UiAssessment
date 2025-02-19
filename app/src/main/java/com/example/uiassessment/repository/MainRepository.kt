@@ -1,22 +1,22 @@
 package com.example.uiassessment.repository
 
-import android.content.SharedPreferences
 import com.example.lostandfound.retrofit.NetworkAPIService
 import com.example.lostandfound.utils.UIState
+import com.example.uiassessment.models.FoodRequestDTO
 import com.example.uiassessment.models.FoodDTO
+import com.example.uiassessment.models.FoodResponseDTO
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
 import retrofit2.awaitResponse
 import javax.inject.Inject
 
 class MainRepository@Inject constructor(val networkAPIService: NetworkAPIService) {
 
-fun createFoodRequest(foodDTO: FoodDTO)= flow<UIState<Void?>> {
+fun createFoodRequest(foodDTO: FoodRequestDTO)= flow<UIState<Void?>> {
     emit(UIState.LoadingState())
     val name = foodDTO.name.toRequestBody("application/json".toMediaTypeOrNull())
     val description = foodDTO.description.toRequestBody("application/json".toMediaTypeOrNull())
@@ -51,6 +51,16 @@ fun createFoodRequest(foodDTO: FoodDTO)= flow<UIState<Void?>> {
 
 }
 
+fun getFoods()= flow<UIState<FoodResponseDTO?>>(){
 
+    emit(UIState.LoadingState())
+    val response=networkAPIService.getFoods().awaitResponse()
+    if(response.isSuccessful){
+        emit(UIState.SuccessState(response.body()))
+    }else{
+        emit(UIState.ErrorState("Check your connection and try again."))
+    }
+
+}
 
 }
